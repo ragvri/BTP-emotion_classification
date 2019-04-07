@@ -58,7 +58,7 @@ for epoch in range(epochs):
     loss = 0
     optimiser.zero_grad()
     torch.set_grad_enabled(True)
-    for x,y in train_generator(batch_size,seq_len=seq_len):
+    for x,y in train_generator.generate(batch_size,seq_len=seq_len):
         if step == steps_per_epoch:
             break
         step = step + 1
@@ -78,7 +78,7 @@ for epoch in range(epochs):
 
     # Zero out gradient, else they will accumulate between epochs
     torch.set_grad_enabled(False)
-    x_test,y_test = next(test_generator(test_generator.total_data(),seq_len=seq_len))
+    x_test,y_test = next(test_generator.generate(test_generator.total_data(),seq_len=seq_len))
     x_test, language = x_test
     y_test_classfication, y_test_intensity = y_test 
     x_test = torch.from_numpy(x_test).cuda()
