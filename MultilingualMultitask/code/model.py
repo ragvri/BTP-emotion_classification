@@ -10,8 +10,9 @@ class Model(nn.Module):
         self.input_dim = input_dim
         self.hidden_dim = 50
         self.num_layers = num_layers
-        self.output_dim = output_dim
-        self.loss = loss
+        self.seq_len = seq_len
+        self.output_dim = len(labels2Idx)
+        # self.loss = loss
 
         self.cnn2 = nn.Conv2d(
             in_channels=1, out_channels=self.hidden_dim, kernel_size=(2, self.hidden_dim*2))
@@ -91,28 +92,29 @@ class Model(nn.Module):
         c4_out = c4_out.contiguous().transpose(1, 2)
 
         sum_cnn_init = c2_out + c3_out + c4_out
-        sum_cnn = sum_cnn_init.contiguous().view(-1, self.seq_len*self.hidden_dim) # contiguous: use whenever doing operations on tensor
+        # contiguous: use whenever doing operations on tensor
+        sum_cnn = sum_cnn_init.contiguous().view(-1, self.seq_len*self.hidden_dim)
 
         shared_cl_out = self.shared_linear_classification(sum_cnn)
         shared_in_out = self.shared_linear_intensity(sum_cnn)
-        
+
         language = 1
         if language == 1:  # Hindi
             hi_cl_out = self.hindi_linear_classification(sum_cnn)
             hi_in_out = self.hindi_linear_intensity(sum_cnn)
             input_prefinal_cl = torch.cat((hi_cl_out, shared_cl_out), 1)
             input_prefinal_cl = input_prefinal_cl.contiguous()
-            input_prefinal_in = torch.cat((hi_in_out,shared_in_out),1)
+            input_prefinal_in = torch.cat((hi_in_out, shared_in_out), 1)
             input_prefinal_in = input_prefinal_in.contiguous()
-        
-        elif language == 0: # English
+
+        elif language == 0:  # English
             en_cl_out = self.engilish_linear_classification(sum_cnn)
             en_in_out = self.english_linear_intensity(sum_cnn)
-            input_prefinal_cl = torch.cat((en_cl_out,shared_cl_out),1)
+            input_prefinal_cl = torch.cat((en_cl_out, shared_cl_out), 1)
             input_prefinal_cl = input_prefinal_cl.contiguous()
-            input_prefinal_in = torch.cat((en_in_out,shared_in_out),1)
+            input_prefinal_in = torch.cat((en_in_out, shared_in_out), 1)
             input_prefinal_in = input_prefinal_in.contiguous()
-        
+
         input_prefinal_cl = self.dropout(input_prefinal_cl)
         input_prefinal_in = self.dropout(input_prefinal_in)
 
@@ -121,16 +123,16 @@ class Model(nn.Module):
 
         return (classification_pred, intensity_pred)
 
+
 if __name__ == "__main__":
 
     labels2Idx = {'SADNESS': 0, 'FEAR/ANXIETY': 1, 'SYMPATHY/PENSIVENESS': 2, 'JOY': 3,
-                'OPTIMISM': 4, 'NO-EMOTION': 5, 'DISGUST': 6, 'ANGER': 7, 'SURPRISE': 8}
+                  'OPTIMISM': 4, 'NO-EMOTION': 5, 'DISGUST': 6, 'ANGER': 7, 'SURPRISE': 8}
     gpu_id = '6'
 
     print(f'Using gpu {gpu_id}')
     setup_gpu(gpu_id)
     model = Model(labels2Idx=labels2Idx)
-
 
     inp = torch.Tensor(16, 75, 300)
     out = model(inp)
