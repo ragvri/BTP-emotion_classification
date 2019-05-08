@@ -98,8 +98,8 @@ class Model(nn.Module):
         shared_cl_out = self.shared_linear_classification(sum_cnn)
         shared_in_out = self.shared_linear_intensity(sum_cnn)
 
-        language = 1
-        if language == 1:  # Hindi
+        language = 0
+        if language == 0:  # Hindi
             hi_cl_out = self.hindi_linear_classification(sum_cnn)
             hi_in_out = self.hindi_linear_intensity(sum_cnn)
             input_prefinal_cl = torch.cat((hi_cl_out, shared_cl_out), 1)
@@ -107,7 +107,7 @@ class Model(nn.Module):
             input_prefinal_in = torch.cat((hi_in_out, shared_in_out), 1)
             input_prefinal_in = input_prefinal_in.contiguous()
 
-        elif language == 0:  # English
+        elif language == 1:  # English
             en_cl_out = self.engilish_linear_classification(sum_cnn)
             en_in_out = self.english_linear_intensity(sum_cnn)
             input_prefinal_cl = torch.cat((en_cl_out, shared_cl_out), 1)

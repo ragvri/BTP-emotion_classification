@@ -73,7 +73,7 @@ class Generator:
                 (batch_size, seq_len, 300), dtype=np.float32)
             batch_class = np.zeros((batch_size, 1), dtype=int)
             batch_intensity = np.zeros((batch_size, 1), dtype=float)
-
+            language = 1
             for i in range(batch_size):
                 # print(self.count)
                 try:
@@ -81,14 +81,17 @@ class Generator:
                         data[0].loc[self.count], seq_len)
                     batch_class[i][0] = self.labels2Idx[data[1].loc[self.count]]
                     batch_intensity[i][0] = data[2].loc[self.count]
+                    # language = data[3].loc[self.count]
                
                 except Exception as e:
                     # print(data[0].loc[self.count])
                     print(self.count, data_len)
+                    # continue
                     # exit()
                 self.count = (self.count + 1) % data_len
 
-            yield ([batch_features_ft, 0], [batch_class, batch_intensity])
+            # will only work properly when batch size is 1 because of language.
+            yield ([batch_features_ft, language], [batch_class, batch_intensity])
 
 
 if __name__ == "__main__":

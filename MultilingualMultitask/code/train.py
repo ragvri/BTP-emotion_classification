@@ -32,14 +32,14 @@ def combined_loss(pred1, targ1, pred2, targ2):
     # print(f'Loss1 : {loss1}')
     targ2 = targ2.float()
     loss2 = mse(pred2, targ2)
-    return 0.5*loss1 + 0.5*loss2, loss1, loss2
+    return 0.9*loss1 + 0.1*loss2, loss1, loss2
 
 
-gpu_id = '2'
-train_file = f'./../dataset/joint_training_data/english/english_train_fold_0.csv'
-test_file = f'./../dataset/joint_training_data/english/english_test_fold_0.csv'
+gpu_id = '6'
+train_file = f'./../dataset/joint_training_data/hindi/hindi_train_fold_1.csv'
+test_file = f'./../dataset/joint_training_data/hindi/hindi_test_fold_1.csv'
 emotions_dictionary = f'./../dataset/emoji_dictionary.json'
-log_file = '/home1/zishan/raghav/emotion/MultilingualMultitask/logs/log.txt'
+log_file = '/home1/zishan/raghav/emotion/MultilingualMultitask/logs/log_hindi_new_loss.txt'
 learning_rate = 1e-4
 batch_size = 16
 epochs = 200
@@ -50,7 +50,7 @@ f.close()
 
 setup_gpu(gpu_id)
 
-ft = fastText.load_model('/home1/zishan/WordEmbeddings/FastText/wiki.en.bin')
+ft = fastText.load_model('/home1/zishan/WordEmbeddings/FastText/wiki.hi.bin')
 labels2Idx = {'SADNESS': 0, 'FEAR/ANXIETY': 1, 'SYMPATHY/PENSIVENESS': 2, 'JOY': 3,
               'OPTIMISM': 4, 'NO-EMOTION': 5, 'DISGUST': 6, 'ANGER': 7, 'SURPRISE': 8}
 train_generator = Generator(train_file, ft, labels2Idx, emotions_dictionary)
@@ -135,8 +135,8 @@ for epoch in range(epochs):
         best_f1 = f1
         best_report = c_r
         best_epoch = epoch
-        torch.save(model.state_dict(), './../weights/weight.pth')
+        torch.save(model.state_dict(), './../weights/weight_hindi_newloss.pth')
 
 with open(log_file, 'a+') as f:
-    to_write = f'Best classfication score at epoch {epoch}. Report:\n {best_report}'
+    to_write = f'Best classfication score at epoch {best_epoch}. Report:\n {best_report}'
     f.write(to_write)
